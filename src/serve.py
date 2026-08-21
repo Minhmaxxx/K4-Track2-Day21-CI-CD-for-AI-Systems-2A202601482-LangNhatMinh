@@ -1,12 +1,34 @@
+import sys
+import os
+import builtins
+import joblib
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import boto3
-import joblib
-import os
+
+# Hook xu ly unpickle tuong thich cho Python 3.14 tren EC2
+try:
+    import sklearn._loss._loss as loss_mod
+except Exception:
+    try:
+        import sklearn._loss as loss_mod
+    except Exception:
+        loss_mod = None
+
+if loss_mod is not None:
+    sys.modules['_loss'] = loss_mod
+    sys.modules['sklearn._loss._loss'] = loss_mod
+
+    orig_import = builtins.__import__
+    def hook_import(name, *args, **kwargs):
+        if name == '_loss':
+            return loss_mod
+        return orig_import(name, *args, **kwargs)
+    builtins.__import__ = hook_import
 
 app = FastAPI()
 
-ARTIFACT_BUCKET = os.environ["ARTIFACT_BUCKET"]
+ARTIFACT_BUCKET = os.environ.get("ARTIFACT_BUCKET", "income-lab-minh-2026")
 AWS_REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
 MODEL_KEY = "artifacts/current/model.joblib"
 MODEL_PATH = os.path.expanduser("~/models/model.joblib")
@@ -34,7 +56,6 @@ class ScoreRequest(BaseModel):
 def healthz():
     """
     Endpoint kiem tra suc khoe server.
-    GitHub Actions goi endpoint nay sau khi deploy de xac nhan server dang chay.
     """
     return {"status": "ok"}
 
