@@ -53,9 +53,9 @@ Chỉ số `f1_score` tính toán trung bình điều hòa giữa Precision và 
 
 | Khó khăn | Nguyên nhân | Cách giải quyết |
 |---|---|---|
-| ___ | ___ | ___ |
-| ___ | ___ | ___ |
-| ___ | ___ | ___ |
+| Lỗi Bad permissions khi SSH vào EC2 trên Windows | Windows tự động kế thừa quyền truy cập cho nhiều user lên file `.pem`. | Sử dụng công cụ `icacls` để hủy kế thừa quyền và chỉ cấp quyền đọc duy nhất cho user hiện tại. |
+| Dịch vụ API trên EC2 không thể nạp model (`AttributeError` unpickle) | Lệch phiên bản `scikit-learn` giữa môi trường huấn luyện của CI và máy ảo EC2. | Đồng bộ phiên bản `scikit-learn` trong `requirements.txt` và nâng cấp runner Python của GitHub Actions. |
+| DVC push bị từ chối quyền truy cập S3 | IAM User ban đầu chưa được cấp chính sách tạo và ghi bucket S3. | Gán thêm chính sách `AmazonS3FullAccess` cho IAM user trên AWS Console. |
 
 ---
 
