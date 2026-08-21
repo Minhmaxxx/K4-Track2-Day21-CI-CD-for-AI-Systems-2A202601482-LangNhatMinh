@@ -27,38 +27,23 @@ HƯỚNG DẪN - đọc rồi XÓA TOÀN BỘ các khối chú thích này sau k
 
 | Lần chạy | n_estimators | learning_rate | max_depth | f1_score | accuracy |
 |---|---|---|---|---|---|
-| 1 | ___ | ___ | ___ | ___ | ___ |
-| 2 | ___ | ___ | ___ | ___ | ___ |
-| 3 | ___ | ___ | ___ | ___ | ___ |
+| 1 | 100 | 0.1 | 3 | 0.7109 | 0.8780 |
+| 2 | 50 | 0.05 | 2 | 0.6051 | 0.8460 |
+| 3 | 200 | 0.1 | 5 | 0.7149 | 0.8740 |
 
-**Bộ siêu tham số đã chọn:** `n_estimators=___`, `learning_rate=___`, `max_depth=___`.
+**Bộ siêu tham số đã chọn:** `n_estimators=200`, `learning_rate=0.1`, `max_depth=5`.
 
-**Lý do:** ___
-
-<!--
-Trả lời trong phần Lý do:
-  - Vì sao bộ này tốt hơn các bộ còn lại (dựa trên f1_score, không phải accuracy)?
-  - Lần chạy có accuracy cao nhất có trùng với lần có f1_score cao nhất không?
-    Nếu không, điều đó nói lên điều gì?
-  - Bạn quan sát thấy đánh đổi nào giữa n_estimators và learning_rate?
--->
+**Lý do:** Bộ siêu tham số này đem lại giá trị `f1_score` cao nhất (0.7149), vượt xa ngưỡng chất lượng tối thiểu 0.65 của bài lab. Điểm đáng chú ý là lần chạy 1 đạt accuracy cao hơn lần chạy 3 (0.8780 so với 0.8740), nhưng `f1_score` lại thấp hơn (0.7109 so với 0.7149). Điều này chứng minh accuracy cao có thể gây ảo giác khi mô hình thiên vị lớp đa số, trong khi cấu hình của lần chạy 3 giúp mô hình cân bằng tốt hơn giữa precision và recall cho lớp thiểu số. Việc tăng `n_estimators` lên 200 kết hợp với `max_depth=5` cho phép mô hình học được các quan hệ phi tuyến phức tạp mà không bị underfitting như ở lần chạy 2.
 
 ---
 
 ## 2. Vì Sao Ngưỡng Chất Lượng Đặt Trên F1 Chứ Không Phải Accuracy
 
-<!-- Khoảng 120 - 150 từ. -->
+Tập dữ liệu Adult Census Income có sự mất cân bằng phân phối lớp rõ rệt: lớp dương (thu nhập > 50K USD/năm) chỉ chiếm 24.8%, trong khi lớp âm (thu nhập <= 50K USD/năm) chiếm tới 75.2%. 
 
-___
+Nếu sử dụng độ đo Accuracy, một mô hình vô dụng luôn dự đoán mặc định nhãn "thu nhập thấp" cho mọi mẫu dữ liệu vẫn dễ dàng đạt được accuracy lên tới 75.2% (0.752), dù hoàn toàn không nhận diện được bất kỳ người có thu nhập cao nào ($F1 = 0.000$). Do đó, Accuracy tạo ra ảo tưởng về hiệu năng và hoàn toàn không thể dùng làm tiêu chí đánh giá cho bài toán này.
 
-<!--
-Cần nêu được:
-  - Phân bố lớp của tập dữ liệu (tỷ lệ lớp thu nhập > 50K) và hệ quả của nó.
-  - Accuracy của một mô hình luôn trả lời "thu nhập thấp" là bao nhiêu, vì sao con số
-    đó gây hiểu nhầm.
-  - F1 của lớp dương đo điều gì mà accuracy không đo được.
-  - Vì sao KHÔNG dùng average="weighted" hay average="macro" khi gọi f1_score.
--->
+Chỉ số `f1_score` tính toán trung bình điều hòa giữa Precision và Recall riêng cho lớp dương (thu nhập cao), phản ánh chính xác năng lực thực tế của mô hình trong việc phát hiện nhóm đối tượng mục tiêu. Chúng ta không sử dụng `average="weighted"` hay `average="macro"` vì các cách tính trung bình này sẽ bị chi phối bởi kích thước áp đảo của lớp âm, làm sai lệch và suy giảm ý nghĩa của ngưỡng kiểm tra chất lượng (Quality Gate).
 
 ---
 
